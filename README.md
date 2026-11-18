@@ -1,6 +1,6 @@
 # Ekran paylaşımı
 
-Windows uygulaması ana ekranın JPEG görüntüsünü yaklaşık saniyede bir gönderir. Vercel sayfası giriş yaptıktan sonra son kareyi alır. Redis'teki son kareye beş saniyelik süre verilir. Windows'ta paylaşımı durdurduğunda uygulama son kareyi silmeyi dener. Web sayfasındaki **Çıkış yap** düğmesi tarayıcıdaki oturumu kapatır.
+Windows uygulaması ana ekranı en fazla 1280 × 720 boyutunda JPEG olarak yakalar ve saniyede 30 kareyi hedefler. Vercel sayfası giriş yaptıktan sonra son kareyi alır. Gerçek kare hızı ağ ve sunucu yanıt süresine bağlıdır. Redis'teki son kareye beş saniyelik süre verilir. Windows'ta paylaşımı durdurduğunda uygulama son kareyi silmeyi dener. Web sayfasındaki **Çıkış yap** düğmesi tarayıcıdaki oturumu kapatır.
 
 ## Vercel
 

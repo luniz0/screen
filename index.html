@@ -8,7 +8,7 @@
   body { color-scheme: dark; background: #111827; color: #f3f4f6; font: 1rem system-ui; padding: 1rem; max-width: 75rem; margin: auto }
   input, button { font: inherit; padding: .55rem; margin: .3rem 0 }
   label { display: block }
-  video { display: block; max-width: 100%; height: auto }
+  img { display: block; max-width: 100%; height: auto }
   [hidden] { display: none }
 </style>
 <main>
@@ -21,10 +21,8 @@
     <button>Giriş yap</button>
   </form>
   <button id="stop" type="button" hidden>Çıkış yap</button>
-  <button id="publish" type="button" hidden>Ekranı paylaş</button>
-  <button id="end" type="button" hidden>Yayını durdur</button>
   <p id="status" role="status">Bağlantı kapalı</p>
-  <video id="frame" autoplay playsinline muted aria-label="Bilgisayar ekranı" hidden></video>
+  <img id="frame" alt="Bilgisayar ekranı" hidden>
 </main>
 <script src="/viewer.js" type="module"></script>
 </html>
