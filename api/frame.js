@@ -64,7 +64,9 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (!['GET', 'PUT', 'DELETE', 'POST'].includes(req.method)) return res.status(405).end();
-  const { VIEW_EMAIL, VIEW_PASSWORD, DEVICE_TOKEN, REDIS_REST_URL, REDIS_REST_TOKEN } = process.env;
+  const { VIEW_EMAIL, VIEW_PASSWORD, DEVICE_TOKEN } = process.env;
+  const redisUrl = process.env.REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const redisToken = process.env.REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!VIEW_EMAIL || !VIEW_PASSWORD || !DEVICE_TOKEN || DEVICE_TOKEN.length < 32) {
     return res.status(503).end();
   }
@@ -77,7 +79,7 @@ export default async function handler(req, res) {
     const allowed = req.method === 'GET' ? hasSession(req, DEVICE_TOKEN, VIEW_PASSWORD) :
       authorized(req, DEVICE_TOKEN);
     if (!allowed) return res.status(401).end();
-    if (!REDIS_REST_URL || !REDIS_REST_TOKEN) return res.status(503).end();
+    if (!redisUrl || !redisToken) return res.status(503).end();
     if (req.method === 'PUT') {
       if (req.headers['content-type'] !== 'image/jpeg') return res.status(415).end();
       const chunks = [];
@@ -94,9 +96,9 @@ export default async function handler(req, res) {
     }
     if (req.method === 'DELETE') command = ['DEL', 'screen:latest'];
 
-    const reply = await fetch(REDIS_REST_URL, {
+    const reply = await fetch(redisUrl, {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + REDIS_REST_TOKEN, 'Content-Type': 'application/json' },
+      headers: { Authorization: 'Bearer ' + redisToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(command),
       signal: AbortSignal.timeout(3000)
     });
