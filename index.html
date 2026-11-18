@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Ekran İzleme</title>
+<style>
+  body { color-scheme: dark; background: #111827; color: #f3f4f6; font: 1rem system-ui; padding: 1rem; max-width: 75rem; margin: auto }
+  button { font: inherit; padding: .55rem; margin: .3rem 0 }
+  img { display: block; max-width: 100%; height: auto }
+  img[hidden] { display: none }
+</style>
+<main>
+  <h1>Ekran İzleme</h1>
+  <button id="stop" type="button" disabled>İzlemeyi durdur</button>
+  <p id="status" role="status">Bağlantı kapalı</p>
+  <img id="frame" alt="Bilgisayar ekranı" hidden>
+</main>
+<script src="/viewer.js" defer></script>
+</html>
