@@ -106,6 +106,9 @@ export default async function handler(req, res) {
     const { result, error } = await reply.json();
     if (error) return res.status(503).end();
     if (req.method !== 'GET' || !result) return res.status(204).end();
+    const etag = '"' + createHash('sha256').update(result).digest('base64url') + '"';
+    res.setHeader('ETag', etag);
+    if (req.headers['if-none-match'] === etag) return res.status(304).end();
     res.setHeader('Content-Type', 'image/jpeg');
     return res.status(200).end(Buffer.from(result, 'base64'));
   } catch {
