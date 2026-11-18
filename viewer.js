@@ -166,7 +166,7 @@ async function start() {
     logout.hidden = false;
     if (publisher) {
       publish.hidden = false;
-      status.textContent = 'Paylaşmaya hazır';
+      status.textContent = 'Ekranı paylaş düğmesine basıp tarayıcıda ekranı seç.';
     } else {
       status.textContent = 'Yayın bekleniyor';
       await view(session);
@@ -183,7 +183,12 @@ async function start() {
 publish.addEventListener('click', async () => {
   const session = active;
   if (!session) return;
+  if (!navigator.mediaDevices?.getDisplayMedia) {
+    status.textContent = 'Bu tarayıcı ekran paylaşımını desteklemiyor. Sayfayı Windows’ta Chrome veya Edge ile aç.';
+    return;
+  }
   publish.hidden = true;
+  status.textContent = 'Tarayıcıda paylaşılacak ekranı seç ve Paylaş düğmesine bas.';
   try {
     const stream = await navigator.mediaDevices.getDisplayMedia({
       video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 60 } },
@@ -197,14 +202,15 @@ publish.addEventListener('click', async () => {
     const [track] = stream.getVideoTracks();
     track.contentHint = 'motion';
     track.addEventListener('ended', () => { if (!session.closed) void start(); });
-    await track.applyConstraints({ width: { ideal: 1920, max: 1920 },
-      height: { ideal: 1080, max: 1080 }, frameRate: { ideal: 60, max: 60 } });
     end.hidden = false;
+    status.textContent = 'Ekran paylaşılıyor · Yayın bağlantısı hazırlanıyor';
     await send(session, track);
   } catch (error) {
     if (session.closed) return;
     await start();
-    status.textContent = error.name === 'NotAllowedError' ? 'Ekran paylaşımı iptal edildi.' : error.message;
+    status.textContent = error.name === 'NotAllowedError'
+      ? 'Ekran paylaşımı iptal edildi veya tarayıcı izin vermedi. Düğmeye basıp ekranı seç ve Paylaş’a bas.'
+      : 'Yayın başlatılamadı. ' + error.message;
   }
 });
 
