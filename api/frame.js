@@ -14,7 +14,7 @@ function sign(expiry, deviceToken, password) {
     .digest('base64url');
 }
 
-function hasSession(req, deviceToken, password) {
+export function hasSession(req, deviceToken, password) {
   const cookie = (req.headers.cookie || '').split(';').map(part => part.trim())
     .find(part => part.startsWith(cookieName + '='));
   const match = cookie?.slice(cookieName.length + 1).match(/^(\d{10})\.([\w-]{43})$/);
