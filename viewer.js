@@ -1,7 +1,10 @@
 const status = document.querySelector('#status');
 const frame = document.querySelector('#frame');
 const stopButton = document.querySelector('#stop');
-const storageKey = 'screen-share-viewer';
+const login = document.querySelector('#login');
+const email = document.querySelector('#email');
+const password = document.querySelector('#password');
+const loginButton = login.querySelector('button');
 let session;
 let imageUrl;
 
@@ -16,20 +19,20 @@ function stop() {
   session?.abort();
   session = undefined;
   clearFrame();
-  stopButton.disabled = true;
+  stopButton.hidden = true;
   status.textContent = 'Bağlantı kapalı';
 }
 
-async function connect(key) {
+async function connect() {
   stop();
+  login.hidden = true;
   const controller = new AbortController();
   session = controller;
-  stopButton.disabled = false;
+  stopButton.hidden = false;
   status.textContent = 'Bağlanıyor';
   while (!controller.signal.aborted) {
     try {
       const response = await fetch('/api/frame', {
-        headers: { Authorization: 'Bearer ' + key },
         cache: 'no-store',
         signal: AbortSignal.any([controller.signal, AbortSignal.timeout(4500)])
       });
@@ -37,8 +40,8 @@ async function connect(key) {
       if (controller.signal.aborted) break;
       if (response.status === 401) {
         stop();
-        sessionStorage.removeItem(storageKey);
-        status.textContent = 'Davet bağlantısı geçersiz';
+        login.hidden = false;
+        status.textContent = 'İzlemek için giriş yap.';
         break;
       }
       const previous = imageUrl;
@@ -61,24 +64,51 @@ async function connect(key) {
   }
 }
 
-function connectFromInvitation() {
+function startViewer() {
   if (location.protocol !== 'https:') {
     status.textContent = 'İzleme sayfasını Vercel HTTPS adresinden aç.';
     return;
   }
-  const invitation = new URLSearchParams(location.hash.slice(1)).get('invite');
-  if (invitation !== null) {
-    history.replaceState(null, '', location.pathname + location.search);
-    sessionStorage.setItem(storageKey, invitation);
-  }
-  const key = sessionStorage.getItem(storageKey);
-  if (key) void connect(key);
-  else status.textContent = 'İzlemek için özel davet bağlantısını aç.';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  void connect();
 }
 
-stopButton.addEventListener('click', () => {
-  sessionStorage.removeItem(storageKey);
+function sessionRequest(body) {
+  return fetch('/api/frame', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(4500)
+  });
+}
+
+login.addEventListener('submit', async event => {
+  event.preventDefault();
+  loginButton.disabled = true;
+  try {
+    const response = await sessionRequest({ email: email.value, password: password.value });
+    if (response.status === 204) void connect();
+    else status.textContent = response.status === 401 ? 'E-posta veya parola hatalı.' :
+      'Giriş şu anda kullanılamıyor.';
+  } catch {
+    status.textContent = 'Giriş bağlantısı kurulamadı.';
+  } finally {
+    password.value = '';
+    loginButton.disabled = false;
+  }
+});
+
+stopButton.addEventListener('click', async () => {
   stop();
+  try {
+    const response = await sessionRequest({ action: 'logout' });
+    if (response.status !== 204) throw new Error();
+    login.hidden = false;
+    status.textContent = 'Oturum kapatıldı.';
+  } catch {
+    stopButton.hidden = false;
+    status.textContent = 'Oturum kapatılamadı. Tekrar dene.';
+  }
 });
 window.addEventListener('pagehide', stop);
-window.addEventListener('pageshow', connectFromInvitation);
+window.addEventListener('pageshow', startViewer);

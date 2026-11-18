@@ -6,13 +6,21 @@
 <title>Ekran İzleme</title>
 <style>
   body { color-scheme: dark; background: #111827; color: #f3f4f6; font: 1rem system-ui; padding: 1rem; max-width: 75rem; margin: auto }
-  button { font: inherit; padding: .55rem; margin: .3rem 0 }
+  input, button { font: inherit; padding: .55rem; margin: .3rem 0 }
+  label { display: block }
   img { display: block; max-width: 100%; height: auto }
   img[hidden] { display: none }
 </style>
 <main>
   <h1>Ekran İzleme</h1>
-  <button id="stop" type="button" disabled>İzlemeyi durdur</button>
+  <form id="login" hidden>
+    <label for="email">E-posta</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Parola</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button>Giriş yap</button>
+  </form>
+  <button id="stop" type="button" hidden>Çıkış yap</button>
   <p id="status" role="status">Bağlantı kapalı</p>
   <img id="frame" alt="Bilgisayar ekranı" hidden>
 </main>
